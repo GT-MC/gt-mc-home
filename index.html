@@ -90,7 +90,7 @@ nav::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;backg
 .gmc>*{position:relative;z-index:1}
 .gmnum{font-size:.6rem;color:var(--t3);letter-spacing:.15em;margin-bottom:10px}
 .gmico{font-size:2.1rem;margin-bottom:12px;display:block;transition:transform .3s,filter .3s}
-.gmc:hover .gmico{transform:scale(1.22) rotate(-6deg);filter:drop-shadow(0 0 12px var(--ca,var(--a)))}
+.gmc:hover .gmico{transform:scale(1.08) rotate(-4deg);filter:drop-shadow(0 0 10px var(--ca,var(--a)))}
 .gmname{font-family:'Orbitron',monospace;font-size:.95rem;font-weight:700;color:var(--t);margin-bottom:7px;letter-spacing:.04em}
 .gmdesc{font-size:.75rem;color:var(--t2);line-height:1.65}
 .gmbadge{display:inline-block;margin-top:12px;font-size:.58rem;letter-spacing:.1em;padding:3px 9px;border:1px solid var(--ca,var(--a));color:var(--ca,var(--a));text-transform:uppercase;transition:all .2s}
@@ -206,6 +206,51 @@ footer{position:relative;z-index:2;padding:36px 48px;border-top:1px solid var(--
 #toast{position:fixed;bottom:26px;right:26px;z-index:300;padding:12px 20px;background:var(--s2);border:1px solid var(--a);font-size:.73rem;color:var(--a2);letter-spacing:.06em;opacity:0;transform:translateY(14px);transition:all .3s;pointer-events:none;box-shadow:0 4px 24px rgba(255,30,60,.14)}
 #toast::before{content:'✓  '}
 #toast.on{opacity:1;transform:none}
+
+/* ── THEME TOGGLE ── */
+.btheme{font-family:'JetBrains Mono',monospace;font-size:.9rem;padding:7px 10px;border:1px solid rgba(255,30,60,.35);background:transparent;cursor:none;transition:all .25s;color:var(--t3)}
+.btheme:hover{border-color:var(--a);color:var(--a)}
+body.light{--bg:#f5f0f0;--s:#fff0f0;--s2:#ffe8e8;--s3:#fde0e0;--b:rgba(255,30,60,.15);--t:#2a0808;--t2:#6a2828;--t3:#a84848;--glow:rgba(255,30,60,.3)}
+body.light #bgc{opacity:.03}
+body.light body::before{background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.02) 2px,rgba(0,0,0,.02) 4px)}
+body.light nav{background:rgba(245,240,240,.96)}
+body.light .termwrap,body.light .bugsbox{background:var(--s2)}
+body.light .tl{color:var(--t)}
+body.light #tinput{color:var(--t)}
+
+/* ── DISCORD WIDGET ── */
+.discord-widget-wrap{margin-top:36px;border:1px solid var(--b);overflow:hidden;background:var(--s)}
+.discord-widget-label{display:flex;align-items:center;gap:10px;padding:14px 20px;background:var(--s2);border-bottom:1px solid var(--b);font-size:.7rem;color:var(--t2);letter-spacing:.1em;text-transform:uppercase}
+.discord-widget-wrap iframe{display:block}
+
+/* ── NEW SHOP ── */
+.shop-cats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px}
+.shop-cat-btn{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;letter-spacing:.12em;padding:9px 18px;border:1px solid var(--b);background:var(--s);color:var(--t3);cursor:none;transition:all .25s;position:relative;overflow:hidden}
+.shop-cat-btn::before{content:'';position:absolute;inset:0;background:var(--a);transform:scaleX(0);transform-origin:left;transition:transform .25s;z-index:-1}
+.shop-cat-btn.active{border-color:var(--a);color:var(--a)}
+.shop-cat-btn.active::before,.shop-cat-btn:hover::before{transform:scaleX(1)}
+.shop-cat-btn:hover{color:var(--bg);border-color:var(--a)}
+.shop-cat-btn.active:hover{color:var(--bg)}
+.shop-items-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:1000px){.shop-items-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:700px){.shop-items-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:420px){.shop-items-grid{grid-template-columns:1fr}}
+.shop-item{background:var(--s);border:1px solid var(--b);padding:22px 18px;position:relative;overflow:hidden;cursor:none;transition:transform .3s,box-shadow .3s,border-color .3s;display:flex;flex-direction:column;gap:10px}
+.shop-item::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% -10%,var(--si-glow,rgba(255,30,60,.07)),transparent 60%);opacity:0;transition:opacity .35s}
+.shop-item::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--si-c,var(--a));transform:scaleX(0);transform-origin:center;transition:transform .35s}
+.shop-item:hover{transform:translateY(-6px);box-shadow:0 18px 50px var(--si-shadow,rgba(255,30,60,.14));border-color:var(--si-c,var(--a))}
+.shop-item:hover::before{opacity:1}
+.shop-item:hover::after{transform:scaleX(1)}
+.shop-item:hover .si-ico{transform:scale(1.12);filter:drop-shadow(0 0 12px var(--si-c,var(--a)))}
+.si-ico{font-size:2.4rem;transition:transform .3s,filter .3s;display:block;line-height:1}
+.si-name{font-family:'Orbitron',monospace;font-size:.82rem;font-weight:700;color:var(--t);letter-spacing:.04em}
+.si-desc{font-size:.7rem;color:var(--t2);line-height:1.6;flex:1}
+.si-price{display:flex;align-items:center;gap:7px;margin-top:4px}
+.si-price-val{font-family:'Orbitron',monospace;font-size:1rem;font-weight:900;color:var(--si-c,var(--a))}
+.si-price-unit{font-size:.58rem;color:var(--t3);letter-spacing:.1em;text-transform:uppercase}
+.si-badge{font-size:.52rem;letter-spacing:.12em;padding:2px 8px;border:1px solid var(--si-c,var(--a));color:var(--si-c,var(--a));text-transform:uppercase;display:inline-block;margin-top:2px;transition:all .2s}
+.shop-item:hover .si-badge{background:var(--si-c,var(--a));color:var(--bg)}
+.shop-empty{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--t3);font-size:.75rem;letter-spacing:.08em}
 </style>
 </head>
 <body>
@@ -225,6 +270,7 @@ footer{position:relative;z-index:2;padding:36px 48px;border-top:1px solid var(--
     <li><a href="#bewerben">Bewerben</a></li>
   </ul>
   <div class="nbtns">
+    <button class="btheme" id="themeBtn" onclick="toggleTheme()" title="Dark/Light Mode">🌙</button>
     <a href="https://discord.gg/dNMWvtvHAG" target="_blank" class="bdc">
       <svg width="14" height="11" viewBox="0 0 24 18" fill="currentColor"><path d="M20.317 1.492a19.84 19.84 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 1.492a.07.07 0 00-.032.027C.533 6.093-.32 10.56.099 14.971a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03z"/></svg>
       DISCORD
@@ -243,7 +289,7 @@ footer{position:relative;z-index:2;padding:36px 48px;border-top:1px solid var(--
     <p class="hsub">Kein normaler Server. Eine <span>Community</span>.</p>
     <div class="hip-wrap">
       <span class="iplbl">SERVER IP</span>
-      <span class="ipval">212.232.18.96:25565</span>
+      <span class="ipval">GT-MC.net</span>
       <button class="ipcopy" id="ipbtn" onclick="copyIP()">KOPIEREN</button>
     </div>
   </div>
@@ -251,7 +297,7 @@ footer{position:relative;z-index:2;padding:36px 48px;border-top:1px solid var(--
 </section>
 
 <div class="tkwrap"><div class="tkinner">
-  <div class="tkitem"><span class="dk r"></span><b>ONLINE</b> — 212.232.18.96:25565</div>
+  <div class="tkitem"><span class="dk r"></span><b>ONLINE</b> — GT-MC.net</div>
   <div class="tkitem"><span class="dk r"></span><b>VERSION</b> 1.21.1</div>
   <div class="tkitem"><span class="dk g"></span><b>SKYBLOCK</b> ONLINE</div>
   <div class="tkitem"><span class="dk g"></span><b>BEDWARS</b> ONLINE</div>
@@ -265,7 +311,7 @@ footer{position:relative;z-index:2;padding:36px 48px;border-top:1px solid var(--
   <div class="tkitem"><span class="dk y"></span><b>SHOP</b> Ränge für 💎 Gems — VIP bis MASTER</div>
   <div class="tkitem"><span class="dk o"></span><b>BUGS</b> werden gefixt — Dev Team aktiv</div>
   <div class="tkitem"><span class="dk r"></span><b>DEV</b> GT-DEV</div>
-  <div class="tkitem"><span class="dk r"></span><b>ONLINE</b> — 212.232.18.96:25565</div>
+  <div class="tkitem"><span class="dk r"></span><b>ONLINE</b> — GT-MC.net</div>
   <div class="tkitem"><span class="dk r"></span><b>VERSION</b> 1.21.1</div>
   <div class="tkitem"><span class="dk g"></span><b>SKYBLOCK</b> ONLINE</div>
   <div class="tkitem"><span class="dk g"></span><b>BEDWARS</b> ONLINE</div>
@@ -287,9 +333,14 @@ footer{position:relative;z-index:2;padding:36px 48px;border-top:1px solid var(--
 </div>
 
 <div class="sec" id="shop">
-  <div class="rv"><div class="stag">// rank shop</div><div class="stitle">Rang mit <span class="cy">💎 Gems</span> kaufen</div></div>
-  <div class="shop-grid rv" id="shop-grid"></div>
-  <div class="shop-note rv" id="shop-note"></div>
+  <div class="rv">
+    <div class="stag">// shop</div>
+    <div class="stitle">GT-MC <span class="ca">Shop</span></div>
+  </div>
+  <div class="shop-cats rv" id="shopCats"></div>
+  <div class="shop-items-wrap rv" id="shopItemsWrap">
+    <div class="shop-items-grid" id="shopItemsGrid"></div>
+  </div>
 </div>
 
 <div class="sec" id="team">
@@ -358,10 +409,17 @@ footer{position:relative;z-index:2;padding:36px 48px;border-top:1px solid var(--
       <div class="cdesc">Live-Streams vom Server — schau vorbei &amp; chat mit.</div><div class="carr">→</div>
     </a>
   </div>
+  <div class="discord-widget-wrap rv">
+    <div class="discord-widget-label">
+      <svg width="18" height="14" viewBox="0 0 24 18" fill="currentColor" style="color:#5865f2"><path d="M20.317 1.492a19.84 19.84 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 1.492a.07.07 0 00-.032.027C.533 6.093-.32 10.56.099 14.971a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03z"/></svg>
+      Live Discord Community
+    </div>
+    <iframe src="https://discord.com/widget?id=1391523712058134728&theme=dark" width="100%" height="500" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
+  </div>
 </div>
 
 <div class="pvstrip">
-  <span class="pvlbl">Server IP</span><span class="pvval pvc" onclick="copyIP()" style="cursor:none">212.232.18.96:25565</span>
+  <span class="pvlbl">Server IP</span><span class="pvval pvc" onclick="copyIP()" style="cursor:none">GT-MC.net</span>
   <span class="pvsep">//</span>
   <span class="pvlbl">Version</span><span class="pvval pvg">1.21.1</span>
   <span class="pvsep">//</span>
@@ -398,13 +456,12 @@ const CONFIG = {
     { name:'CREATOR',ico:'📷', gems:'ONLY APLY',color:'#ff6b35',tag:'MEDIA',   popular:false, perks:['Alles aus ELITE','Force Lobby start','Mute & Prio report','Creator tag','Stream add','Global server chat','7 tage vip gift'] },
   ],
   team: [
-    { name:'Felix',   mc:'LFT10',          role:'FOUNDER', color:'#ff6b35', crown:'👑', founder:true, founderDesc:'Founder von GT-MC — hat alles aufgebaut & am Laufen gehalten.' },
+    { name:'Felix',   mc:'LFT10',          role:'👑 FOUNDER', color:'#ff6b35', crown:'👑', founder:true, founderDesc:'Founder von GT-MC — hat alles aufgebaut & am Laufen gehalten.' },
+    { name:'Nero',    mc:'DroppedbyxNero', role:'MANAGEMENT', color:'#ffd700', crown:'⭐' },
     { name:'Angelo',  mc:'AngeloGXMR',     role:'OWNER',      color:'#ff4488', crown:'👑', dashBorder:true },
-    { name:'Nero',    mc:'DroppedbyxNero', role:'ADMIN', color:'#ffd700', crown:'' },
-    { name:'Hendrik', mc:'Anonym1337',           role:'ADMIN',      color:'#ff2244', crown:'' },
-    { name:'Wochi', mc:'BastiDB34',           role:'ADMIN',      color:'#ff2244', crown:'' },
+    { name:'Jan',     mc:'jan1653',         role:'CO-OWNER',   color:'#ff8c42', crown:'' },
+    { name:'No-name', mc:'4tiv',           role:'ADMIN',      color:'#ff2244', crown:'' },
     { name:'Nico',    mc:'ronny_9n',        role:'MODERATOR',  color:'#ff6b35', crown:'' },
-    { name:'Minilo',    mc:'MiniloGHG',        role:'SUP',  color:'#00A2FF', crown:'' },
     { name:'Mr None', mc:'3quh',           role:'HELPER',     color:'#d4889a', crown:'' },
     { name:'Matteo',  mc:'matteoGhgyt',     role:'CREATOR',    color:'#ff4488', crown:'' },
     { name:'Stynx',   mc:'blue_bc',         role:'CREATOR',    color:'#ff4488', crown:'' },
@@ -453,7 +510,7 @@ initM();window.addEventListener('resize',initM);setInterval(drawM,55);
 function sp(){const p=document.createElement('div');p.className='ptc';const cs=['#ff6b35','#ff6b35','#ff4488','#ffd700','#ff8c42'];const sz=1+Math.random()*2.5;p.style.cssText=`left:${Math.random()*100}vw;bottom:-4px;width:${sz}px;height:${sz}px;background:${cs[Math.floor(Math.random()*cs.length)]};box-shadow:0 0 6px currentColor;animation-duration:${4+Math.random()*8}s;--drift:${(Math.random()-.5)*140}px`;document.body.appendChild(p);setTimeout(()=>p.remove(),13000)}
 setInterval(sp,350);
 
-function copyIP(){navigator.clipboard.writeText('212.232.18.96:25565').then(()=>{const t=document.getElementById('toast'),b=document.getElementById('ipbtn');t.classList.add('on');if(b){b.textContent='KOPIERT ✓';b.classList.add('ok')}setTimeout(()=>{t.classList.remove('on');if(b){b.textContent='KOPIEREN';b.classList.remove('ok')}},2200)})}
+function copyIP(){navigator.clipboard.writeText('GT-MC.net').then(()=>{const t=document.getElementById('toast'),b=document.getElementById('ipbtn');t.classList.add('on');if(b){b.textContent='KOPIERT ✓';b.classList.add('ok')}setTimeout(()=>{t.classList.remove('on');if(b){b.textContent='KOPIEREN';b.classList.remove('ok')}},2200)})}
 function buyRank(rank){window.open('https://discord.gg/dNMWvtvHAG','_blank')}
 
 const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('on')}),{threshold:.07});
@@ -462,7 +519,7 @@ function reObserve(){document.querySelectorAll('.rv,.rvr').forEach(el=>obs.obser
 const tout=document.getElementById('tout'),tin=document.getElementById('tinput');
 const CMDS={
   help:()=>[{c:'tinfo',t:'──── Befehle ─────────────────────────'},{c:'tok',t:'  ip / version / gamemodes / team'},{c:'tok',t:'  shop / discord / reddit'},{c:'tok',t:'  youtube / twitch / bugs / status'},{c:'tok',t:'  bewerben — Bewerbung öffnen'},{c:'tok',t:'  clear — Terminal leeren'},{c:'tinfo',t:'──────────────────────────────────────'}],
-  ip:()=>[{c:'tinfo',t:'→ 212.232.18.96:25565'},{c:'to2',t:'  Java & Bedrock Edition'}],
+  ip:()=>[{c:'tinfo',t:'→ GT-MC.net'},{c:'to2',t:'  Java & Bedrock Edition'}],
   version:()=>[{c:'tinfo',t:'→ Java 1.21.1'},{c:'to2',t:'  Bedrock kompatibel'}],
   gamemodes:()=>{const lines=[{c:'tinfo',t:`── ${CONFIG.gamemodes.length} Gamemodes ──────────────────`}];CONFIG.gamemodes.forEach((g,i)=>lines.push({c:'tok',t:`  ${String(i+1).padStart(2,'0')}  ${g.ico} ${g.name}  [${g.badge}]`}));return lines},
   team:()=>{const lines=[{c:'tinfo',t:'── GT-MC Team ──────────────────────────'}];CONFIG.team.forEach(m=>lines.push({c:'tok',t:`  ${m.name.padEnd(12)} │ ${m.role.replace(/[👑⭐]/g,'').trim().padEnd(11)} │ ${m.mc}`}));return lines},
@@ -473,13 +530,107 @@ const CMDS={
   twitch:()=>[{c:'tinfo',t:'→ https://www.twitch.tv/dercamperlft'}],
   bugs:()=>[{c:'twarn',t:'⚠  Bekannte Bugs vorhanden'},{c:'tok',t:'✓  Dev-Team arbeitet aktiv daran'},{c:'to2',t:'   Bug melden: Discord'}],
   bewerben:()=>[{c:'tinfo',t:'── Offene Positionen ─────────────'},{c:'tok',t:'  🎧 SUPPORT    │ Spieler helfen'},{c:'tok',t:'  🛡️ MODERATOR  │ Server moderieren'},{c:'tok',t:'  ⚙️ ADMIN      │ Server verwalten'},{c:'tok',t:'  💻 DEVELOPER  │ Plugins entwickeln'},{c:'tok',t:'  📷 CREATOR    │ Content erstellen'},{c:'to2',t:'  → Abschnitt #bewerben auf der Website'}],
-  status:()=>[{c:'tok',t:'● ONLINE  212.232.18.96:25565'},{c:'tok',t:'● VER     1.21.1'},{c:'tok',t:`● MODES   ${CONFIG.gamemodes.length} aktiv`},{c:'tok',t:`● TEAM    ${CONFIG.team.length} Mitglieder`},{c:'tok',t:`● RÄNGE   ${CONFIG.ranks.length} verfügbar`},{c:'tinfo',t:'● DEV     GT-DEV'}],
+  status:()=>[{c:'tok',t:'● ONLINE  GT-MC.net'},{c:'tok',t:'● VER     1.21.1'},{c:'tok',t:`● MODES   ${CONFIG.gamemodes.length} aktiv`},{c:'tok',t:`● TEAM    ${CONFIG.team.length} Mitglieder`},{c:'tok',t:`● RÄNGE   ${CONFIG.ranks.length} verfügbar`},{c:'tinfo',t:'● DEV     GT-DEV'}],
   clear:()=>{tout.innerHTML='';return[]},
 };
 function addTLine(cls,txt){const s=document.createElement('span');s.className='tl '+cls;s.textContent=txt;tout.appendChild(s);tout.scrollTop=9999}
 tin.addEventListener('keydown',e=>{if(e.key!=='Enter')return;const raw=tin.value.trim();tin.value='';if(!raw)return;const prompt=document.createElement('span');prompt.className='tl';prompt.innerHTML=`<span class="tp2">root@gt-mc:~$</span> <span class="tc2">${raw.replace(/</g,'&lt;')}</span>`;tout.appendChild(prompt);const key=raw.toLowerCase().replace(/\s/g,'');if(CMDS[key]){const lines=CMDS[key]();lines.forEach((l,i)=>setTimeout(()=>addTLine(l.c,l.t),i*45))}else{setTimeout(()=>addTLine('terr',`bash: ${raw}: command not found`),45);setTimeout(()=>addTLine('to2','Tippe "help" für alle Befehle.'),90)}tout.scrollTop=9999});
 
-renderGamemodes();renderRanks();renderTeam();reObserve();refreshCursorTargets();
+renderGamemodes();renderTeam();reObserve();refreshCursorTargets();
+
+/* ════ DARK/LIGHT MODE ════ */
+function toggleTheme(){
+  const btn=document.getElementById('themeBtn');
+  document.body.classList.toggle('light');
+  const isLight=document.body.classList.contains('light');
+  btn.textContent=isLight?'🌙':'☀️';
+  localStorage.setItem('gtmc-theme',isLight?'light':'dark');
+}
+(function(){
+  if(localStorage.getItem('gtmc-theme')==='light'){
+    document.body.classList.add('light');
+    const btn=document.getElementById('themeBtn');
+    if(btn)btn.textContent='🌙';
+  }
+})();
+
+/* ════ NEW SHOP ════ */
+const SHOP_DATA={
+  raenge:{label:'Ränge',icon:'👑',color:'#ffd700',items:[
+    {ico:'🥉',name:'VIP',desc:'Farbiges Prefix, /fly in Lobby, 2x Shards, /sign auf SMP.',price:500},
+    {ico:'🌿',name:'PREMIUM',desc:'Alles aus VIP + Custom Namecolor, Prio Join, Discord Rang.',price:1200},
+    {ico:'🥇',name:'GOLD',desc:'Alles aus PREMIUM + Prio Support, 6 /home Slots, Partikel.',price:2500},
+    {ico:'💠',name:'PLATIN',desc:'Alles aus GOLD + Beta Zugang, /nick, Platin-Only Events.',price:5000},
+    {ico:'⚡',name:'ELITE',desc:'Alles aus PLATIN + Partikel Trail, unlimitierte /home Slots.',price:10000},
+    {ico:'👑',name:'MASTER',desc:'Alles aus ELITE + Join Sound, Fly auf SMP, VIP-Support.',price:25000},
+  ]},
+  upranks:{label:'UP Ranks',icon:'⬆️',color:'#ff8c42',items:[
+    {ico:'🔺',name:'Rank Boost I',desc:'Verdiene für 7 Tage 25% mehr Shards in allen Gamemodes.',price:300},
+    {ico:'🔺🔺',name:'Rank Boost II',desc:'Verdiene für 7 Tage 50% mehr Shards in allen Gamemodes.',price:600},
+    {ico:'🔺🔺🔺',name:'Rank Boost III',desc:'Verdiene für 7 Tage doppelte Shards überall.',price:1000},
+    {ico:'🏆',name:'XP Boost',desc:'14 Tage lang 2x XP auf allen Gamemodes.',price:750},
+    {ico:'🎯',name:'Drop Boost',desc:'7 Tage erhöhte Drop-Rate bei Crates & Events.',price:400},
+  ]},
+  modkeys:{label:'Moderation Keys',icon:'🔑',color:'#ff4488',items:[
+    {ico:'🗝️',name:'Common Key',desc:'Öffnet eine Common Crate — enthält Items, Shards & Boosts.',price:150},
+    {ico:'🔑',name:'Rare Key',desc:'Öffnet eine Rare Crate mit seltenen Cosmetics & Rängen.',price:500},
+    {ico:'🏅',name:'Epic Key',desc:'Öffnet eine Epic Crate mit exklusiven Items & Rang-Teilen.',price:1200},
+    {ico:'💎',name:'Legendary Key',desc:'Öffnet die Legendary Crate — höchste Drop-Chance für Ränge.',price:3000},
+    {ico:'🌟',name:'Event Key',desc:'Nur bei Events verfügbar — enthält limitierte Cosmetics.',price:2000},
+    {ico:'🎁',name:'Mystery Box',desc:'Überraschungsinhalt — könnte alles sein. Viel Glück!',price:999},
+  ]},
+  booster:{label:'Booster',icon:'🚀',color:'#a855f7',items:[
+    {ico:'💨',name:'Speed Booster',desc:'Erhöhe deine Bewegungsgeschwindigkeit für 1 Stunde.',price:200},
+    {ico:'🛡️',name:'Shield Booster',desc:'Nimm 24 Stunden lang 20% weniger Schaden auf PvP-Servern.',price:350},
+    {ico:'💰',name:'Coin Booster',desc:'2x Coins für 3 Stunden in allen Gamemodes.',price:450},
+    {ico:'✨',name:'Glow Booster',desc:'Leuchte 24 Stunden in deiner Wunschfarbe.',price:180},
+    {ico:'🌍',name:'Server Booster',desc:'Booste den ganzen Server — alle profitieren für 1 Stunde.',price:800},
+    {ico:'🎆',name:'Party Booster',desc:'3 Stunden lang doppelte Rewards für dich & 4 Freunde.',price:600},
+  ]},
+};
+
+let shopActiveCat='raenge';
+
+function renderShop(){
+  const cats=document.getElementById('shopCats');
+  const grid=document.getElementById('shopItemsGrid');
+  if(!cats||!grid)return;
+  // render category buttons
+  cats.innerHTML=Object.entries(SHOP_DATA).map(([k,c])=>
+    `<button class="shop-cat-btn${k===shopActiveCat?' active':''}" onclick="setShopCat('${k}')">${c.icon} ${c.label}</button>`
+  ).join('');
+  // render items
+  renderShopItems();
+}
+
+function setShopCat(k){
+  shopActiveCat=k;
+  document.querySelectorAll('.shop-cat-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.shop-cat-btn').forEach(b=>{
+    if(b.textContent.includes(SHOP_DATA[k].label))b.classList.add('active');
+  });
+  renderShopItems();
+}
+
+function renderShopItems(){
+  const grid=document.getElementById('shopItemsGrid');
+  const cat=SHOP_DATA[shopActiveCat];
+  if(!cat){grid.innerHTML='<div class="shop-empty">Keine Items gefunden.</div>';return;}
+  const rgb=hexToRgb(cat.color);
+  grid.innerHTML=cat.items.map(item=>`
+    <div class="shop-item" style="--si-c:${cat.color};--si-glow:rgba(${rgb},.08);--si-shadow:rgba(${rgb},.15)">
+      <span class="si-ico">${item.ico}</span>
+      <div class="si-name">${esc(item.name)}</div>
+      <div class="si-desc">${esc(item.desc)}</div>
+      <div class="si-price">
+        <span class="si-price-val">💎 ${item.price.toLocaleString('de-DE')}</span>
+        <span class="si-price-unit">Shards</span>
+      </div>
+      <span class="si-badge">${SHOP_DATA[shopActiveCat].label}</span>
+    </div>`).join('');
+}
+
+renderShop();
 </script>
 
 <!-- ═══════════════════════ BEWERBEN ═══════════════════════ -->
