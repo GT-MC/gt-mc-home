@@ -268,6 +268,8 @@ body.light #tinput{color:var(--t)}
     <li><a href="#terminal">Terminal</a></li>
     <li><a href="#community">Community</a></li>
     <li><a href="#bewerben">Bewerben</a></li>
+    <li><a href="#report">Report</a></li>
+    <li><a href="#appeal">Appeal</a></li>
   </ul>
   <div class="nbtns">
     <button class="btheme" id="themeBtn" onclick="toggleTheme()" title="Dark/Light Mode">🌙</button>
@@ -571,7 +573,14 @@ const SHOP_DATA={
     {ico:'🏆',name:'XP Boost',desc:'14 Tage lang 2x XP auf allen Gamemodes.',price:750},
     {ico:'🎯',name:'Drop Boost',desc:'7 Tage erhöhte Drop-Rate bei Crates & Events.',price:400},
   ]},
-  modkeys:{label:'Moderation Keys',icon:'🔑',color:'#ff4488',items:[
+  moderation:{label:'Moderation',icon:'🛡️',color:'#ff4488',items:[
+    {ico:'🔕',name:'Mute Schutz',desc:'Schützt dich 7 Tage vor temporären Mutes durch andere Spieler.',price:800},
+    {ico:'🛡️',name:'Report Shield',desc:'Verhindert für 3 Tage, dass Reports gegen dich direkt eskalieren.',price:500},
+    {ico:'⚡',name:'Prio Report',desc:'Deine Reports werden bevorzugt vom Mod-Team bearbeitet — 30 Tage.',price:600},
+    {ico:'🔍',name:'Mod Insight',desc:'Sieh den Status deiner Reports und Beschwerden im Discord.',price:300},
+    {ico:'🏛️',name:'Appeal Fast Track',desc:'Dein Ban-Appeal wird innerhalb von 24h bearbeitet, nicht 72h.',price:1200},
+  ]},
+  keys:{label:'Keys',icon:'🔑',color:'#a855f7',items:[
     {ico:'🗝️',name:'Common Key',desc:'Öffnet eine Common Crate — enthält Items, Shards & Boosts.',price:150},
     {ico:'🔑',name:'Rare Key',desc:'Öffnet eine Rare Crate mit seltenen Cosmetics & Rängen.',price:500},
     {ico:'🏅',name:'Epic Key',desc:'Öffnet eine Epic Crate mit exklusiven Items & Rang-Teilen.',price:1200},
@@ -630,8 +639,363 @@ function renderShopItems(){
     </div>`).join('');
 }
 
+
+/* ════ REPORT & APPEAL WEBHOOKS ════ */
+const WH_REPORT='https://discord.com/api/webhooks/1493156149854470294/-nmFbk6_tefDNgdDoDhXlAd0zBcQIAN_k061mkk4miOuzgH5WMkdgWqwV4pVS9SIn9ob';
+const WH_APPEAL='https://discord.com/api/webhooks/1493156655062450326/bZCOMT4ZwBRti6itXmvWqmJ8Y7YRzJMfmkkaA7Qe8DkBOa9kI-3M3h96aYFtKG_7B7OE';
+
+/* ── REPORT ── */
+async function submitReport(){
+  const own=document.getElementById('rep_own_mc')?.value.trim();
+  const owdc=document.getElementById('rep_own_dc')?.value.trim();
+  const target=document.getElementById('rep_target')?.value.trim();
+  const server=document.getElementById('rep_server')?.value;
+  const when=document.getElementById('rep_when')?.value.trim();
+  const desc=document.getElementById('rep_desc')?.value.trim();
+  const rules=Array.from(document.querySelectorAll('.ra-cb:checked')).map(c=>c.value);
+  const err=document.getElementById('rep_err');
+  err.classList.remove('show');
+  if(!own||!owdc||!target||!server||server==='— wählen —'||!when||!desc||rules.length===0){
+    err.classList.add('show');return;
+  }
+  const btn=document.getElementById('rep_btn');
+  btn.disabled=true;btn.classList.add('loading');btn.textContent='WIRD GESENDET';
+  const proof=document.getElementById('rep_proof')?.value.trim()||'—';
+  const witness=document.getElementById('rep_witness')?.value.trim()||'—';
+  const payload={
+    username:'GT-MC Report System',
+    embeds:[{
+      title:'🚨 Neuer Spieler-Report',color:16711740,
+      fields:[
+        {name:'Reporter (IGN)',value:own,inline:true},
+        {name:'Reporter (Discord)',value:owdc,inline:true},
+        {name:'Gemeldeter Spieler',value:target,inline:true},
+        {name:'Server / Gamemode',value:server,inline:true},
+        {name:'Zeitpunkt',value:when,inline:true},
+        {name:'\u200b',value:'\u200b',inline:true},
+        {name:'Regelverstoß',value:rules.join(', ')},
+        {name:'Beschreibung',value:desc.slice(0,1024)},
+        {name:'Beweise',value:proof.slice(0,512)},
+        {name:'Zeugen',value:witness},
+      ],
+      footer:{text:'GT-MC Report • '+new Date().toLocaleString('de-DE')}
+    }]
+  };
+  try{
+    const r=await fetch(WH_REPORT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if(r.ok||r.status===204){
+      document.querySelector('#rep-form .ra-fields').style.display='none';
+      btn.style.display='none';
+      document.querySelector('#rep-form .ra-note').style.display='none';
+      document.querySelector('#rep-form .ra-intro').style.display='none';
+      document.getElementById('rep-form').innerHTML+='<div class="ra-success"><span class="ra-succ-ico">✅</span><div class="ra-succ-title">Report eingegangen!</div><div class="ra-succ-sub">Dein Report gegen <strong style="color:var(--a)">'+target+'</strong> wurde an das Mod-Team gesendet.<br>Das Team prüft den Fall und handelt entsprechend. Danke!</div><button class="ra-succ-btn" onclick="location.reload()">NEUEN REPORT SENDEN</button></div>';
+    }else throw new Error('HTTP '+r.status);
+  }catch(e){
+    btn.disabled=false;btn.classList.remove('loading');btn.textContent='🚨 REPORT ABSENDEN';
+    err.textContent='Fehler beim Senden: '+e.message+'. Bitte erneut versuchen.';err.classList.add('show');
+  }
+}
+
+/* ── APPEAL TAB SYSTEM ── */
+const APPEAL_TYPES={
+  unban:{label:'Unban Appeal',ico:'🔓',color:'#ff1e3c',
+    desc:'Du wurdest auf GT-MC gebannt und möchtest Einspruch einlegen. Erkläre ehrlich warum du entbannt werden solltest.',
+    fields:[
+      {id:'mc',label:'Dein Minecraft-Name',ph:'Dein gebannter IGN',req:true},
+      {id:'dc',label:'Dein Discord',ph:'username',req:true},
+      {id:'ban_reason',label:'Angezeigter Bangrund',ph:'Was steht beim Einloggen?',req:true},
+      {id:'ban_date',label:'Wann wurdest du gebannt?',ph:'Datum / Uhrzeit (ca.)',req:true},
+      {id:'ban_admin',label:'Wer hat gebannt? (falls bekannt)',ph:'Teamname oder "unbekannt"'},
+      {id:'did_it',label:'Hast du gegen die Regeln verstoßen?',type:'radio',opts:['Nein, ich war es nicht','Ja, aber es war ein Versehen','Ja, ich bereue es'],req:true},
+      {id:'explanation',label:'Deine Erklärung / Begründung',ph:'Erkläre deine Situation ausführlich...',ta:true,req:true},
+      {id:'proof',label:'Beweise / Screenshots (Links)',ph:'Optional aber hilfreich...'},
+    ]},
+  unwarn:{label:'Unwarn Antrag',ico:'⚠️',color:'#ffd700',
+    desc:'Du möchtest eine Verwarnung anfechten, die zu Unrecht oder unverhältnismäßig ausgesprochen wurde.',
+    fields:[
+      {id:'mc',label:'Dein Minecraft-Name',ph:'Dein IGN',req:true},
+      {id:'dc',label:'Dein Discord',ph:'username',req:true},
+      {id:'warn_reason',label:'Grund der Verwarnung',ph:'Was wurde als Grund angegeben?',req:true},
+      {id:'warn_date',label:'Wann wurdest du verwarnt?',ph:'Datum / Uhrzeit',req:true},
+      {id:'warn_admin',label:'Wer hat verwarnt?',ph:'Teamname oder "unbekannt"'},
+      {id:'why_wrong',label:'Warum ist die Verwarnung falsch?',ph:'Erkläre warum sie ungerechtfertigt ist...',ta:true,req:true},
+      {id:'proof',label:'Beweise / Screenshots',ph:'Links zu Beweisen...'},
+    ]},
+  unmute:{label:'Unmute Antrag',ico:'🔊',color:'#ff8c42',
+    desc:'Du wurdest gemuted und möchtest den Mute anfechten oder um vorzeitige Aufhebung bitten.',
+    fields:[
+      {id:'mc',label:'Dein Minecraft-Name',ph:'Dein IGN',req:true},
+      {id:'dc',label:'Dein Discord',ph:'username',req:true},
+      {id:'mute_reason',label:'Grund des Mutes',ph:'Was wurde als Grund angegeben?',req:true},
+      {id:'mute_dur',label:'Wie lange bist du gemuted?',ph:'z.B. 1 Stunde / permanent'},
+      {id:'mute_admin',label:'Wer hat gemuted?',ph:'Teamname oder "unbekannt"'},
+      {id:'why_wrong',label:'Warum sollte der Mute aufgehoben werden?',ph:'Deine Begründung...',ta:true,req:true},
+      {id:'proof',label:'Beweise',ph:'Optional...'},
+    ]},
+  ipban:{label:'IP-Ban Appeal',ico:'🌐',color:'#ff4488',
+    desc:'Deine IP-Adresse wurde gebannt. Dies passiert häufig bei mehrfachen Verstößen oder automatisch durch das System.',
+    fields:[
+      {id:'mc',label:'Betroffener Minecraft-Name',ph:'IGN',req:true},
+      {id:'dc',label:'Dein Discord',ph:'username',req:true},
+      {id:'ip_info',label:'Haben andere Personen an deiner IP gespielt?',type:'radio',opts:['Ja, Familienmitglied','Ja, Mitbewohner','Nein, nur ich'],req:true},
+      {id:'ban_reason',label:'Angezeigter Bangrund (falls sichtbar)',ph:'Was siehst du beim Verbinden?'},
+      {id:'ban_date',label:'Seit wann ist die IP gesperrt?',ph:'Datum ca.',req:true},
+      {id:'explanation',label:'Deine Erklärung',ph:'Erkläre die Situation ausführlich...',ta:true,req:true},
+      {id:'other_accounts',label:'Andere Accounts an dieser IP?',ph:'IGNs auflisten oder "keine"'},
+      {id:'proof',label:'Beweise',ph:'Optional...'},
+    ]},
+  netban:{label:'Net-Ban Appeal',ico:'🔒',color:'#d4889a',
+    desc:'Ein Netzwerk-Ban betrifft alle Accounts und IPs, die mit deinem Account in Verbindung stehen.',
+    fields:[
+      {id:'mc',label:'Primärer Minecraft-Name',ph:'Haupt-IGN',req:true},
+      {id:'dc',label:'Dein Discord',ph:'username',req:true},
+      {id:'all_accounts',label:'Alle betroffenen Accounts',ph:'IGN1, IGN2, IGN3...',req:true},
+      {id:'ban_reason',label:'Grund des Net-Bans',ph:'Was wurde dir mitgeteilt?',req:true},
+      {id:'ban_date',label:'Datum des Net-Bans',ph:'Datum / Uhrzeit',req:true},
+      {id:'explanation',label:'Deine Erklärung',ph:'Sehr detailliert — Net-Bans sind ernst...',ta:true,req:true},
+      {id:'regret',label:'Bereust du dein Verhalten?',type:'radio',opts:['Ja, vollständig','Teilweise','Ich sehe keinen Regelverstoß'],req:true},
+      {id:'proof',label:'Beweise / Entlastung',ph:'Alles was hilft...'},
+    ]},
+};
+
+let appealActive='unban';
+
+function setAppealTab(type){
+  appealActive=type;
+  document.querySelectorAll('.ra-tab[id^="ap-tab"]').forEach(t=>t.classList.remove('active'));
+  document.getElementById('ap-tab-'+type)?.classList.add('active');
+  renderAppealForm();
+}
+
+function renderAppealForm(){
+  const t=APPEAL_TYPES[appealActive];
+  const body=document.getElementById('ap-body');
+  if(!body)return;
+  const fieldsHtml=t.fields.map(f=>{
+    const uid='ap_'+appealActive+'_'+f.id;
+    const req=f.req?'<b> *</b>':'';
+    let inner='';
+    if(f.type==='radio'){
+      inner='<div class="ra-check-group">'+f.opts.map((o,i)=>
+        `<input type="radio" class="ra-cb" name="${uid}" id="${uid}r${i}" value="${o}"><label class="ra-cbl" for="${uid}r${i}">${o}</label>`
+      ).join('')+'</div>';
+    } else if(f.ta){
+      inner=`<textarea class="ra-textarea" id="${uid}" placeholder="${f.ph||''}"></textarea>`;
+    } else {
+      inner=`<input class="ra-input" id="${uid}" type="text" placeholder="${f.ph||''}" autocomplete="off">`;
+    }
+    return `<div class="ra-field full"><label class="ra-label">${f.label}${req}</label>${inner}</div>`;
+  }).join('');
+
+  body.innerHTML=`
+    <div class="ra-intro">
+      <span class="ra-intro-ico">${t.ico}</span>
+      <div>
+        <div class="ra-intro-title">${t.label}</div>
+        <div class="ra-intro-sub">${t.desc}</div>
+      </div>
+    </div>
+    <div class="ra-fields">${fieldsHtml}</div>
+    <div class="ra-error" id="ap_err">Bitte fülle alle Pflichtfelder aus!</div>
+    <button class="ra-submit" id="ap_btn" onclick="submitAppeal('${appealActive}')">📨 APPEAL ABSENDEN</button>
+    <div class="ra-note">Appeals werden innerhalb von 24–72 Stunden bearbeitet. Sei geduldig und respektvoll.</div>`;
+}
+
+async function submitAppeal(type){
+  const t=APPEAL_TYPES[type];
+  const err=document.getElementById('ap_err');
+  err.classList.remove('show');
+  // collect + validate
+  const vals={};let valid=true;
+  t.fields.forEach(f=>{
+    const uid='ap_'+type+'_'+f.id;
+    let v='';
+    if(f.type==='radio'){const rb=document.querySelector(`input[name="${uid}"]:checked`);v=rb?rb.value:'';}
+    else{const el=document.getElementById(uid);v=el?el.value.trim():'';}
+    vals[f.id]=v;
+    if(f.req&&!v)valid=false;
+  });
+  if(!valid){err.classList.add('show');return;}
+  const btn=document.getElementById('ap_btn');
+  btn.disabled=true;btn.classList.add('loading');btn.textContent='WIRD GESENDET';
+  const colorMap={unban:16711740,unwarn:16766720,unmute:16750658,ipban:16722056,netban:13927594};
+  const embedFields=t.fields.map(f=>({name:f.label,value:(vals[f.id]||'—').slice(0,1024),inline:!f.ta&&(vals[f.id]||'').length<80}));
+  const payload={
+    username:'GT-MC Appeal System',
+    embeds:[{
+      title:`${t.ico} Neuer ${t.label}`,
+      color:colorMap[type]||16711740,
+      description:`**IGN:** ${vals.mc||'—'}
+**Discord:** ${vals.dc||'—'}`,
+      fields:embedFields.slice(0,25),
+      footer:{text:'GT-MC Appeal • '+new Date().toLocaleString('de-DE')}
+    }]
+  };
+  try{
+    const r=await fetch(WH_APPEAL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if(r.ok||r.status===204){
+      document.getElementById('ap-body').innerHTML='<div class="ra-success"><span class="ra-succ-ico">✅</span><div class="ra-succ-title">Appeal eingegangen!</div><div class="ra-succ-sub">Dein <strong style="color:var(--a)">' +t.label+'</strong> wurde an das Team gesendet.<br>Wir melden uns innerhalb von 24–72h über Discord. Danke für deine Geduld!</div><button class="ra-succ-btn" onclick="setAppealTab(\''+type+'\')">NEUEN APPEAL SENDEN</button></div>';
+    }else throw new Error('HTTP '+r.status);
+  }catch(e){
+    btn.disabled=false;btn.classList.remove('loading');btn.textContent='📨 APPEAL ABSENDEN';
+    err.textContent='Fehler: '+e.message+'. Bitte erneut versuchen.';err.classList.add('show');
+  }
+}
+
+// Init appeal form on load
+document.addEventListener('DOMContentLoaded',()=>{renderAppealForm();});
+
 renderShop();
 </script>
+
+
+<!-- ═══════════════════════════ REPORT ═══════════════════════════ -->
+<div class="sec" id="report">
+  <div class="rv">
+    <div class="stag">// spieler melden</div>
+    <div class="stitle">Spieler <span class="ca">reporten</span></div>
+  </div>
+  <div class="report-wrap rv">
+    <div class="ra-tabs">
+      <button class="ra-tab active" onclick="setTab('report','rep-form')">🚨 SPIELER REPORTEN</button>
+    </div>
+    <div class="ra-body" id="rep-form">
+      <div class="ra-intro">
+        <span class="ra-intro-ico">🚨</span>
+        <div>
+          <div class="ra-intro-title">Spieler melden</div>
+          <div class="ra-intro-sub">Melde regelwidrige Spieler direkt an unser Mod-Team. Fülle alle Felder gewissenhaft aus — falsche Reports können bestraft werden.</div>
+        </div>
+      </div>
+      <div class="ra-fields">
+        <div class="ra-row">
+          <div class="ra-field">
+            <label class="ra-label">Dein Minecraft-Name <b>*</b></label>
+            <input class="ra-input" id="rep_own_mc" type="text" placeholder="Dein IGN" autocomplete="off">
+          </div>
+          <div class="ra-field">
+            <label class="ra-label">Dein Discord <b>*</b></label>
+            <input class="ra-input" id="rep_own_dc" type="text" placeholder="username" autocomplete="off">
+          </div>
+        </div>
+        <div class="ra-row">
+          <div class="ra-field">
+            <label class="ra-label">Gemeldeter Spieler (IGN) <b>*</b></label>
+            <input class="ra-input" id="rep_target" type="text" placeholder="IGN des Spielers" autocomplete="off">
+          </div>
+          <div class="ra-field">
+            <label class="ra-label">Server / Gamemode <b>*</b></label>
+            <select class="ra-select" id="rep_server">
+              <option>— wählen —</option>
+              <option>Skyblock</option><option>Bedwars</option><option>Skywars</option>
+              <option>MMA</option><option>Duels</option><option>GTMC</option>
+              <option>Simple SMP</option><option>Knockback FFA</option>
+              <option>Event Server</option><option>Lobby</option><option>Discord</option>
+            </select>
+          </div>
+        </div>
+        <div class="ra-field full">
+          <label class="ra-label">Regelverstoß <b>*</b></label>
+          <div class="ra-check-group" id="rep_rule_group">
+            <input type="checkbox" class="ra-cb" id="rv1" value="Cheating/Hacking"><label for="rv1" class="ra-cbl">⚡ Cheating/Hacking</label>
+            <input type="checkbox" class="ra-cb" id="rv2" value="Beleidigung/Hate"><label for="rv2" class="ra-cbl">💢 Beleidigung/Hate</label>
+            <input type="checkbox" class="ra-cb" id="rv3" value="Spam"><label for="rv3" class="ra-cbl">💬 Spam</label>
+            <input type="checkbox" class="ra-cb" id="rv4" value="Bug-Abuse"><label for="rv4" class="ra-cbl">🐛 Bug-Abuse</label>
+            <input type="checkbox" class="ra-cb" id="rv5" value="Griefing (SMP)"><label for="rv5" class="ra-cbl">⛏️ Griefing (SMP)</label>
+            <input type="checkbox" class="ra-cb" id="rv6" value="Werbung"><label for="rv6" class="ra-cbl">📢 Werbung</label>
+            <input type="checkbox" class="ra-cb" id="rv7" value="Teaming (verboten)"><label for="rv7" class="ra-cbl">🤝 Teaming</label>
+            <input type="checkbox" class="ra-cb" id="rv8" value="Toxisches Verhalten"><label for="rv8" class="ra-cbl">☠️ Toxisch</label>
+            <input type="checkbox" class="ra-cb" id="rv9" value="Stehlen (SMP)"><label for="rv9" class="ra-cbl">🏴‍☠️ Stehlen</label>
+            <input type="checkbox" class="ra-cb" id="rv10" value="Anderes"><label for="rv10" class="ra-cbl">❓ Anderes</label>
+          </div>
+        </div>
+        <div class="ra-field full">
+          <label class="ra-label">Wann ist es passiert? <b>*</b></label>
+          <input class="ra-input" id="rep_when" type="text" placeholder="z.B. heute 15:30 Uhr, vor 2 Stunden...">
+        </div>
+        <div class="ra-field full">
+          <label class="ra-label">Beschreibung des Vorfalls <b>*</b></label>
+          <textarea class="ra-textarea" id="rep_desc" placeholder="Beschreibe was passiert ist — je detaillierter desto besser..."></textarea>
+        </div>
+        <div class="ra-field full">
+          <label class="ra-label">Beweise (Screenshot/Video-Links)</label>
+          <textarea class="ra-textarea" id="rep_proof" placeholder="Imgur, YouTube, Gyazo Links... (optional aber empfohlen)" style="min-height:65px"></textarea>
+        </div>
+        <div class="ra-field full">
+          <label class="ra-label">Zeugen (IGNs, optional)</label>
+          <input class="ra-input" id="rep_witness" type="text" placeholder="IGN1, IGN2...">
+        </div>
+      </div>
+      <div class="ra-error" id="rep_err">Bitte fülle alle Pflichtfelder aus!</div>
+      <button class="ra-submit" id="rep_btn" onclick="submitReport()">🚨 REPORT ABSENDEN</button>
+      <div class="ra-note">Falsche Reports können zu einer Verwarnung deines Accounts führen. Nur echte Verstöße melden.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ APPEAL ═══════════════════════════ -->
+<div class="sec" id="appeal">
+  <div class="rv">
+    <div class="stag">// appeals & anträge</div>
+    <div class="stitle">Unban / <span class="ca">Appeal</span></div>
+  </div>
+  <div class="report-wrap rv">
+    <div class="ra-tabs">
+      <button class="ra-tab active" id="ap-tab-unban" onclick="setAppealTab('unban')">🔓 UNBAN</button>
+      <button class="ra-tab" id="ap-tab-unwarn" onclick="setAppealTab('unwarn')">⚠️ UNWARN</button>
+      <button class="ra-tab" id="ap-tab-unmute" onclick="setAppealTab('unmute')">🔊 UNMUTE</button>
+      <button class="ra-tab" id="ap-tab-ipban" onclick="setAppealTab('ipban')">🌐 IP-BAN</button>
+      <button class="ra-tab" id="ap-tab-netban" onclick="setAppealTab('netban')">🔒 NET-BAN</button>
+    </div>
+    <div class="ra-body" id="ap-body"></div>
+  </div>
+</div>
+
+<style>
+/* ── REPORT / APPEAL ── */
+.report-wrap{border:1px solid var(--b);background:var(--s);overflow:hidden}
+.ra-tabs{display:flex;background:var(--s2);border-bottom:1px solid var(--b);flex-wrap:wrap}
+.ra-tab{font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:700;letter-spacing:.1em;padding:13px 18px;border:none;border-right:1px solid var(--b);background:transparent;color:var(--t3);cursor:none;transition:all .25s;position:relative}
+.ra-tab::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--a);transform:scaleX(0);transition:transform .25s}
+.ra-tab.active{color:var(--a)}.ra-tab.active::after{transform:scaleX(1)}
+.ra-tab:hover:not(.active){color:var(--t2)}
+.ra-body{padding:28px 28px 24px}
+.ra-intro{display:flex;align-items:flex-start;gap:16px;padding:16px 20px;background:var(--s2);border:1px solid var(--b);margin-bottom:24px}
+.ra-intro-ico{font-size:2rem;flex-shrink:0}
+.ra-intro-title{font-family:'Orbitron',monospace;font-size:.85rem;font-weight:700;color:var(--t);margin-bottom:4px;letter-spacing:.04em}
+.ra-intro-sub{font-size:.71rem;color:var(--t2);line-height:1.65}
+.ra-fields{display:flex;flex-direction:column;gap:14px;margin-bottom:16px}
+.ra-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:600px){.ra-row{grid-template-columns:1fr}}
+.ra-field{display:flex;flex-direction:column;gap:6px}
+.ra-field.full{grid-column:1/-1}
+.ra-label{font-size:.6rem;letter-spacing:.13em;text-transform:uppercase;color:var(--t3)}
+.ra-label b{color:var(--a)}
+.ra-input,.ra-select,.ra-textarea{width:100%;background:var(--s3);border:1px solid rgba(255,30,60,.15);color:var(--t);font-family:'JetBrains Mono',monospace;font-size:.75rem;padding:10px 13px;outline:none;transition:border-color .2s,box-shadow .2s;cursor:none}
+.ra-input::placeholder,.ra-textarea::placeholder{color:var(--t3);opacity:.6}
+.ra-input:focus,.ra-select:focus,.ra-textarea:focus{border-color:var(--a);box-shadow:0 0 0 2px rgba(255,30,60,.08)}
+.ra-textarea{resize:vertical;min-height:90px;line-height:1.65}
+.ra-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7'%3E%3Cpath d='M1 1l4.5 4 4.5-4' stroke='%23ff1e3c' stroke-width='1.4' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:11px}
+.ra-select option{background:#1a0a0a}
+.ra-check-group{display:flex;flex-wrap:wrap;gap:7px}
+.ra-cb{display:none}
+.ra-cbl{font-size:.65rem;letter-spacing:.06em;padding:7px 12px;border:1px solid rgba(255,30,60,.15);color:var(--t3);cursor:none;transition:all .2s;user-select:none}
+.ra-cb:checked+.ra-cbl{border-color:var(--a);color:var(--a);background:rgba(255,30,60,.07)}
+.ra-cbl:hover{border-color:rgba(255,30,60,.4);color:var(--t)}
+.ra-error{background:rgba(255,30,60,.07);border:1px solid rgba(255,30,60,.25);color:var(--a);font-size:.7rem;padding:10px 14px;display:none;margin-bottom:12px}
+.ra-error.show{display:block}
+.ra-submit{width:100%;font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;letter-spacing:.14em;padding:14px;border:none;background:var(--a);color:var(--bg);cursor:none;transition:all .3s;position:relative;overflow:hidden;margin-bottom:12px}
+.ra-submit:hover{background:var(--a2);transform:translateY(-2px);box-shadow:0 8px 28px rgba(255,30,60,.3)}
+.ra-submit:disabled{opacity:.5;transform:none;pointer-events:none}
+.ra-submit.loading::after{content:'';display:inline-block;width:11px;height:11px;border:2px solid var(--bg);border-top-color:transparent;border-radius:50%;animation:spin .6s linear infinite;margin-left:10px;vertical-align:middle}
+.ra-note{font-size:.64rem;color:var(--t3);line-height:1.6;border-left:2px solid rgba(255,30,60,.2);padding-left:12px}
+.ra-success{text-align:center;padding:40px 20px;animation:fup .4s ease both}
+.ra-succ-ico{font-size:3rem;margin-bottom:12px;display:block;animation:ringPop .4s ease both}
+.ra-succ-title{font-family:'Orbitron',monospace;font-size:1rem;font-weight:700;color:var(--a);margin-bottom:8px;letter-spacing:.04em}
+.ra-succ-sub{font-size:.73rem;color:var(--t2);line-height:1.7}
+.ra-succ-btn{margin-top:20px;font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;letter-spacing:.12em;padding:10px 24px;border:1px solid var(--a);background:transparent;color:var(--a);cursor:none;transition:all .3s}
+.ra-succ-btn:hover{background:var(--a);color:var(--bg)}
+</style>
 
 <!-- ═══════════════════════ BEWERBEN ═══════════════════════ -->
 <div class="sec" id="bewerben">
